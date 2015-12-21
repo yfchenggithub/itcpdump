@@ -5,8 +5,10 @@
 #include <sys/socket.h>
 #include <stdarg.h>
 #include <netinet/in.h>
+#include <netinet/ether.h>
 #include <netinet/if_ether.h>
 #include <arpa/inet.h>
+#include <net/ethernet.h>
 
 void log_error(const char* fmt, ...)
 {
@@ -81,13 +83,29 @@ int main(int argc, char** argv)
 	char* _maskp = inet_ntoa(_addr);
 	log_info("mask %s\n", _maskp);
 	
-	pcap_t* _pd = pcap_open_live(_dev, 65535, 0, 1000, _errbuf);
+	pcap_t* _pd = pcap_open_live(_dev, 65535, 1, 1000, _errbuf);
 	if (!_pd)
 	{
 		log_error("pcap_open_live %s fail: %s\n", _dev, _errbuf);
 		return -1;
 	}
+
+	struct bpf_program _bpf;
 	
-	pcap_loop(_pd, 0,my_callback, NULL);
+	if (argv[1])
+	{	
+		if (pcap_compile(_pd, &_bpf, argv[1], 0, _net) < 0)
+		{
+			log_error("pcap_compile fail: %s\n", _errbuf);
+			return -1;
+		}
+
+		if (pcap_setfilter(_pd, &_bpf) < 0)
+		{
+			log_error("pcap_setfilter fail: %s\n", _errbuf);
+			return -1;
+		}
+	}	
+	pcap_loop(_pd, 0, my_callback, NULL);
 	return 0;
 }
