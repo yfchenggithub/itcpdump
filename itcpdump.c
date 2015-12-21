@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <stdarg.h>
 #include <netinet/in.h>
+#include <netinet/if_ether.h>
 #include <arpa/inet.h>
 
 void log_error(const char* fmt, ...)
@@ -39,6 +40,15 @@ void log_warning(const char* fmt, ...)
 	va_end(va);	
 }
 
+/*callback is passed to pcap_loop, called each time a packet received*/
+void my_callback(u_char* useless, const struct pcap_pkthdr* pkthdr, const u_char* packet)
+{
+	static int _pkt_total = 0;
+	log_info("capture %d packets\n", _pkt_total);
+	fflush(stdout);		
+	++_pkt_total;
+}
+
 int main(int argc, char** argv)
 {
 	char _errbuf[PCAP_ERRBUF_SIZE];
@@ -70,5 +80,14 @@ int main(int argc, char** argv)
 	_addr.s_addr = _mask;
 	char* _maskp = inet_ntoa(_addr);
 	log_info("mask %s\n", _maskp);
+	
+	pcap_t* _pd = pcap_open_live(_dev, 65535, 0, 1000, _errbuf);
+	if (!_pd)
+	{
+		log_error("pcap_open_live %s fail: %s\n", _dev, _errbuf);
+		return -1;
+	}
+	
+	pcap_loop(_pd, 0,my_callback, NULL);
 	return 0;
 }
