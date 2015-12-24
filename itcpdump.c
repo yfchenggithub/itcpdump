@@ -3,44 +3,12 @@
 #include <pcap/pcap.h>
 #include <errno.h>
 #include <sys/socket.h>
-#include <stdarg.h>
 #include <netinet/in.h>
 #include <netinet/ether.h>
 #include <netinet/if_ether.h>
 #include <arpa/inet.h>
 #include <net/ethernet.h>
-
-void log_error(const char* fmt, ...)
-{
-	va_list va;
-	va_start(va, fmt);
-	vprintf(fmt, va);	
-	va_end(va);	
-}
-
-void log_info(const char* fmt, ...)
-{
-	va_list va;
-	va_start(va, fmt);
-	vprintf(fmt, va);	
-	va_end(va);	
-}
-
-void log_debug(const char* fmt, ...)
-{
-	va_list va;
-	va_start(va, fmt);
-	vprintf(fmt, va);	
-	va_end(va);	
-}
-
-void log_warning(const char* fmt, ...)
-{
-	va_list va;
-	va_start(va, fmt);
-	vprintf(fmt, va);	
-	va_end(va);	
-}
+#include "log_dump.h"
 
 /*callback is passed to pcap_loop, called each time a packet received*/
 void my_callback(u_char* useless, const struct pcap_pkthdr* pkthdr, const u_char* packet)
