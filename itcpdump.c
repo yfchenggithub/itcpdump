@@ -1,27 +1,24 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pcap/pcap.h>
-#include <errno.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/ether.h>
-#include <netinet/if_ether.h>
-#include <arpa/inet.h>
-#include <net/ethernet.h>
 #include "log_dump.h"
+#include "itcpdump.h"
+#include "pkthdr_dump.h"
 
 /*callback is passed to pcap_loop, called each time a packet received*/
-void my_callback(u_char* useless, const struct pcap_pkthdr* pkthdr, const u_char* packet)
+/*pkthdr: information about when the packet was sniffed, how large it is*/
+void got_packet_callback(u_char* _pcap_loop_last_arg, const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {
+	log_info("pcap_loop last argument %s\n", _pcap_loop_last_arg);
 	static int _pkt_total = 0;
 	log_info("capture %d packets\n", _pkt_total);
+	dump_pkthdr(pkthdr);	
 	fflush(stdout);		
 	++_pkt_total;
 }
 
 int main(int argc, char** argv)
 {
-	char _errbuf[PCAP_ERRBUF_SIZE];
+	char _errbuf[PCAP_ERRBUF_SIZE + 1];
+	bzero(_errbuf, sizeof(_errbuf));
+
 	char* _dev = pcap_lookupdev(_errbuf);
 	if (!_dev)
 	{
@@ -31,6 +28,7 @@ int main(int argc, char** argv)
 	log_info("lookup dev: %s\n", _dev);	
 	
 	bpf_u_int32 _net, _mask;
+	/*get network address and network mask for a capture device*/
 	if (pcap_lookupnet(_dev, &_net, &_mask, _errbuf) < 0)
 	{
 		log_error("pcap_lookupnet error: %s\n", _errbuf);
@@ -51,7 +49,11 @@ int main(int argc, char** argv)
 	char* _maskp = inet_ntoa(_addr);
 	log_info("mask %s\n", _maskp);
 	
-	pcap_t* _pd = pcap_open_live(_dev, 65535, 1, 1000, _errbuf);
+	int _snaplen = 65535;
+	int _promisc_mode = 1;
+	/*1秒(s) = 1000 毫秒(ms) = 1,000,000 微秒*/
+	int _to_ms = 1000;
+	pcap_t* _pd = pcap_open_live(_dev, _snaplen, _promisc_mode, _to_ms, _errbuf);
 	if (!_pd)
 	{
 		log_error("pcap_open_live %s fail: %s\n", _dev, _errbuf);
@@ -59,21 +61,40 @@ int main(int argc, char** argv)
 	}
 
 	struct bpf_program _bpf;
-	
-	if (argv[1])
+	const char* _filter_str = argv[1];	
+	if (_filter_str)
 	{	
-		if (pcap_compile(_pd, &_bpf, argv[1], 0, _net) < 0)
+		log_info("_filter_str %s\n", _filter_str);
+		int _compile_optimize = 0;
+		char* _tmp_err_msg = NULL;
+		if (pcap_compile(_pd, &_bpf, _filter_str, _compile_optimize, _net) < 0)
 		{
-			log_error("pcap_compile fail: %s\n", _errbuf);
+			_tmp_err_msg = pcap_geterr(_pd);
+			log_error("%s\n", _tmp_err_msg);
 			return -1;
 		}
 
 		if (pcap_setfilter(_pd, &_bpf) < 0)
 		{
-			log_error("pcap_setfilter fail: %s\n", _errbuf);
+			_tmp_err_msg = pcap_geterr(_pd);
+			log_error("%s\n", _tmp_err_msg);
 			return -1;
 		}
 	}	
-	pcap_loop(_pd, 0, my_callback, NULL);
+	
+	int _pkt_total = 0;
+	/*0 for cnt is equivalent to infinity*/
+	u_char* _user_use_msg = (u_char*)"user use msg";
+	int _loop_ret = pcap_loop(_pd, _pkt_total, got_packet_callback, _user_use_msg);
+	if (-1 == _loop_ret)
+	{
+		log_error("pcap_loop error\n");
+	}
+	
+	if (-2 == _loop_ret)
+	{
+		log_error("called pcap_breakloop\n");
+	}
+
 	return 0;
 }
