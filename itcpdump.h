@@ -1,3 +1,6 @@
+#ifndef ITCPDUMP_H
+#define ITCPDUMP_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pcap/pcap.h>
@@ -9,3 +12,5 @@
 #include <arpa/inet.h>
 #include <net/ethernet.h>
 #include <strings.h>
+
+#endif

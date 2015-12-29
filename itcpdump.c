@@ -1,17 +1,19 @@
 #include "log_dump.h"
 #include "itcpdump.h"
 #include "pkthdr_dump.h"
+#include "ethernet_header.h"
 
 /*callback is passed to pcap_loop, called each time a packet received*/
 /*pkthdr: information about when the packet was sniffed, how large it is*/
 void got_packet_callback(u_char* _pcap_loop_last_arg, const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {
-	log_info("pcap_loop last argument %s\n", _pcap_loop_last_arg);
 	static int _pkt_total = 0;
-	log_info("capture %d packets\n", _pkt_total);
 	dump_pkthdr(pkthdr);	
+	const sniff_ethernet_t* _ethernet = (const sniff_ethernet_t*)packet;
+	dump_ether_header(_ethernet);
 	fflush(stdout);		
 	++_pkt_total;
+	log_info("capture %d packets\n", _pkt_total);
 }
 
 int main(int argc, char** argv)
@@ -60,6 +62,7 @@ int main(int argc, char** argv)
 		return -1;
 	}
 
+	log_info("opening device %s\n", _dev);
 	struct bpf_program _bpf;
 	const char* _filter_str = argv[1];	
 	if (_filter_str)
@@ -82,7 +85,7 @@ int main(int argc, char** argv)
 		}
 	}	
 	
-	int _pkt_total = 0;
+	int _pkt_total = 10;
 	/*0 for cnt is equivalent to infinity*/
 	u_char* _user_use_msg = (u_char*)"user use msg";
 	int _loop_ret = pcap_loop(_pd, _pkt_total, got_packet_callback, _user_use_msg);
