@@ -2,18 +2,19 @@
 #include "itcpdump.h"
 #include "pkthdr_dump.h"
 #include "ethernet_header.h"
+#include "ip_hdr.h"
 
 /*callback is passed to pcap_loop, called each time a packet received*/
 /*pkthdr: information about when the packet was sniffed, how large it is*/
 void got_packet_callback(u_char* _pcap_loop_last_arg, const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {
 	static int _pkt_total = 0;
-	dump_pkthdr(pkthdr);	
 	const sniff_ethernet_t* _ethernet = (const sniff_ethernet_t*)packet;
 	dump_ether_header(_ethernet);
+	const sniff_ip_t* _ip_hdr = (const sniff_ip_t*)(packet + M_ETHER_HDR_LEN);
+	dump_ip_hdr(_ip_hdr);
 	fflush(stdout);		
 	++_pkt_total;
-	log_info("capture %d packets\n", _pkt_total);
 }
 
 int main(int argc, char** argv)

@@ -41,7 +41,7 @@ const char* dump_ether_type_str(const int _ether_type)
 
 const char* dump_ether_addr_str(const u_char* _ether_addr)
 {
-	log_info("%02x:%02x:%02x:%02x:%02x:%02x\n", _ether_addr[0], _ether_addr[1], _ether_addr[2], _ether_addr[3], _ether_addr[4], _ether_addr[5]);
+	log_info("%02x:%02x:%02x:%02x:%02x:%02x  ", _ether_addr[0], _ether_addr[1], _ether_addr[2], _ether_addr[3], _ether_addr[4], _ether_addr[5]);
 	return "srt";
 }
 
@@ -51,7 +51,7 @@ void dump_ether_header(const sniff_ethernet_t* _ether_hdr)
 	{
 		return;	
 	}	
-
+	
 	dump_ether_addr_str(_ether_hdr->ether_src_host);
 	dump_ether_addr_str(_ether_hdr->ether_dst_host);	
 	dump_ether_type_str(ntohs(_ether_hdr->ether_type));
