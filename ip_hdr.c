@@ -55,8 +55,11 @@ void dump_ip_hdr(const sniff_ip_t* _ip_hdr)
 	log_info("_ip_id %d ", _ip_id);
 	
 	u_short _ip_offset = ntohs(_ip_hdr->ip_off);
-	log_info("_ip_offset %d ", _ip_offset);
+	log_info("_ip_offset %d ", _ip_offset & 0x1fff);
 	
+	u_char _ip_flag = (_ip_offset & 0xe000) >> 13;
+	log_info("_ip_flag 0x%x ", _ip_flag);	
+
 	u_char _ip_ttl = _ip_hdr->ip_ttl;
 	log_info("_ip_ttl %d ", _ip_ttl);
 	
