@@ -27,6 +27,6 @@ typedef struct _sniff_tcp_hdr
 
 }sniff_tcp_hdr_t;
 
-void dump_tcp_flags_str(u_short _tcp_flag);
+void dump_tcp_flags_str(u_char _tcp_flag);
 void dump_tcp_hdr(const sniff_tcp_hdr_t* _tcp_hdr);
 #endif

@@ -18,6 +18,7 @@ void got_packet_callback(u_char* _pcap_loop_last_arg, const struct pcap_pkthdr* 
 	const sniff_tcp_hdr_t* _tcp_hdr = (const sniff_tcp_hdr_t*)(packet + M_ETHER_HDR_LEN + _ip_hdr_size);	
 	dump_tcp_hdr(_tcp_hdr);
 	fflush(stdout);		
+	log_info("\n\n");
 	++_pkt_total;
 }
 
@@ -69,13 +70,13 @@ int main(int argc, char** argv)
 
 	log_info("opening device %s\n", _dev);
 	struct bpf_program _bpf;
-	const char* _filter_str = argv[1];	
-	if (_filter_str)
+	const char* _filter_condition = argv[1];	
+	if (_filter_condition)
 	{	
-		log_info("_filter_str %s\n", _filter_str);
+		log_info("_filter_condition %s\n", _filter_condition);
 		int _compile_optimize = 0;
 		char* _tmp_err_msg = NULL;
-		if (pcap_compile(_pd, &_bpf, _filter_str, _compile_optimize, _net) < 0)
+		if (pcap_compile(_pd, &_bpf, _filter_condition, _compile_optimize, _net) < 0)
 		{
 			_tmp_err_msg = pcap_geterr(_pd);
 			log_error("%s\n", _tmp_err_msg);
@@ -89,11 +90,17 @@ int main(int argc, char** argv)
 			return -1;
 		}
 	}	
-	
-	int _pkt_total = 10;
+
+	int _pkt_to_capture = 0; 
+	if (argv[2])
+	{
+		_pkt_to_capture = atoi(argv[2]);
+		log_info("_pkt_to_capture %d\n", _pkt_to_capture);
+	}
+
 	/*0 for cnt is equivalent to infinity*/
 	u_char* _user_use_msg = (u_char*)"user use msg";
-	int _loop_ret = pcap_loop(_pd, _pkt_total, got_packet_callback, _user_use_msg);
+	int _loop_ret = pcap_loop(_pd, _pkt_to_capture, got_packet_callback, _user_use_msg);
 	if (-1 == _loop_ret)
 	{
 		log_error("pcap_loop error\n");

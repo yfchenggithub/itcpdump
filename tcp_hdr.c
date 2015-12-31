@@ -2,9 +2,33 @@
 #include "tcp_hdr.h"
 #include "log_dump.h"
 
+#define NULL 0
+static const char* tcp_flags_strs[] = {"FIN", "SYN", "RST", "PSH", "ACK", "URG", "ECE", "CWR", NULL};
+static const int tcp_flags_ids[] = {0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80, 0x0};
 
-void dump_tcp_flags(u_short _tcp_flags)
+static int index_flags(u_char _flag)
 {
+	int _index = -1;
+	while (_flag)
+	{
+		_flag = _flag >> 1;
+		++_index;
+	}
+	return _index;
+}
+
+void dump_tcp_flags(u_char _tcp_flags)
+{
+	int flags_count = sizeof(tcp_flags_ids) / sizeof(int);
+	int i;
+	for (i=0; i<flags_count; ++i)
+	{
+		if (_tcp_flags & tcp_flags_ids[i])
+		{
+			int _index = index_flags(tcp_flags_ids[i]);
+			log_info("%s ", tcp_flags_strs[_index]);
+		}	
+	}	
 }
 	
 void dump_tcp_hdr(const sniff_tcp_hdr_t* _tcp_hdr)
@@ -26,7 +50,7 @@ void dump_tcp_hdr(const sniff_tcp_hdr_t* _tcp_hdr)
 	u_int _ack_num = ntohl(_tcp_hdr->ack_id);
 	log_info("_ack_num: %d ", _ack_num);
 
-	/*a bit for 4 bytes*/	
+	/*a bit for 4 bytes, only for save space*/	
 	u_short _hdr_len = TH_OFF(_tcp_hdr) * 4;
 	log_info("_hdr_len %d ", _hdr_len);
 	
