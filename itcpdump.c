@@ -4,6 +4,8 @@
 #include "ethernet_header.h"
 #include "ip_hdr.h"
 #include "tcp_hdr.h"
+#include "udp_hdr.h"
+#include "global.h"
 
 /*callback is passed to pcap_loop, called each time a packet received*/
 /*pkthdr: information about when the packet was sniffed, how large it is*/
@@ -12,11 +14,27 @@ void got_packet_callback(u_char* _pcap_loop_last_arg, const struct pcap_pkthdr* 
 	static int _pkt_total = 0;
 	const sniff_ethernet_t* _ethernet = (const sniff_ethernet_t*)packet;
 	dump_ether_header(_ethernet);
-	const sniff_ip_t* _ip_hdr = (const sniff_ip_t*)(packet + M_ETHER_HDR_LEN);
-	dump_ip_hdr(_ip_hdr);
-	size_t _ip_hdr_size = sizeof(sniff_ip_t);
-	const sniff_tcp_hdr_t* _tcp_hdr = (const sniff_tcp_hdr_t*)(packet + M_ETHER_HDR_LEN + _ip_hdr_size);	
-	dump_tcp_hdr(_tcp_hdr);
+
+	if (get_pkt_ip_network())
+	{
+		const sniff_ip_t* _ip_hdr = (const sniff_ip_t*)(packet + M_ETHER_HDR_LEN);
+		dump_ip_hdr(_ip_hdr);
+	}	
+
+	if (get_pkt_tcp_transport())
+	{
+		size_t _ip_hdr_size = sizeof(sniff_ip_t);
+		const sniff_tcp_hdr_t* _tcp_hdr = (const sniff_tcp_hdr_t*)(packet + M_ETHER_HDR_LEN + _ip_hdr_size);
+		dump_tcp_hdr(_tcp_hdr);
+	}
+	
+	if (get_pkt_udp_transport())
+	{
+		size_t _ip_hdr_size = sizeof(sniff_ip_t);
+		const sniff_udp_hdr_t* _udp_hdr = (const sniff_udp_hdr_t*)(packet + M_ETHER_HDR_LEN + _ip_hdr_size);
+		dump_udp_hdr(_udp_hdr);
+	}
+
 	fflush(stdout);		
 	log_info("\n\n");
 	++_pkt_total;

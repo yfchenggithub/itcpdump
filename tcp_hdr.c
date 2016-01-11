@@ -45,10 +45,10 @@ void dump_tcp_hdr(const sniff_tcp_hdr_t* _tcp_hdr)
 	log_info("_dst_port: %d ", _dst_port);
 	
 	u_int _seq_num = ntohl(_tcp_hdr->seq_id);
-	log_info("_seq_num: %d ", _seq_num);
+	log_info("_seq_num: %lu ", _seq_num);
 	
 	u_int _ack_num = ntohl(_tcp_hdr->ack_id);
-	log_info("_ack_num: %d ", _ack_num);
+	log_info("_ack_num: %lu ", _ack_num);
 
 	/*a bit for 4 bytes, only for save space*/	
 	u_short _hdr_len = TH_OFF(_tcp_hdr) * 4;

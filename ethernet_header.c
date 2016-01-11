@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include "ethernet_header.h"
 #include "log_dump.h"
+#include "global.h"
 
 const char* dump_ether_type_str(const int _ether_type)
 {
@@ -9,6 +10,7 @@ const char* dump_ether_type_str(const int _ether_type)
 		case ETHER_TYPE_IP:
 		{
 			log_info("ipv4 \n");
+			set_pkt_ip_network(true);
 			return "IPv4";
 		}
 		

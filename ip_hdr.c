@@ -2,6 +2,7 @@
 #include <strings.h>
 #include "ip_hdr.h"
 #include "log_dump.h"
+#include "global.h"
 
 #define IP_STR_MAX_SIZE 20
 char* in_addr_to_str(struct in_addr _addr)
@@ -18,14 +19,18 @@ void dump_ip_proto_str(u_char _ip_proto)
 {
 	switch (_ip_proto)
 	{
+		log_info("protocol: ");
 		case IPPROTO_TCP:
 			log_info("tcp ");
+			set_pkt_tcp_transport(true);	
 			break;
 		case IPPROTO_UDP:
 			log_info("udp ");
+			set_pkt_udp_transport(true);
 			break;
 		case IPPROTO_ICMP:
 			log_info("icmp ");
+			set_pkt_icmp_flag(true);	
 			break;
 		default:
 			log_warning("_ip_proto %d not support\n", _ip_proto);
