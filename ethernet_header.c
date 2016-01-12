@@ -10,13 +10,14 @@ const char* dump_ether_type_str(const int _ether_type)
 		case ETHER_TYPE_IP:
 		{
 			log_info("ipv4 \n");
-			set_pkt_ip_network(true);
+			set_pkt_network_ip_flag(true);
 			return "IPv4";
 		}
 		
 		case ETHER_TYPE_ARP:
 		{
 			log_info("arp \n");
+			set_pkt_arp_flag(true);
 			return "ARP";
 		}
 

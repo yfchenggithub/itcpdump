@@ -22,11 +22,11 @@ void dump_ip_proto_str(u_char _ip_proto)
 		log_info("protocol: ");
 		case IPPROTO_TCP:
 			log_info("tcp ");
-			set_pkt_tcp_transport(true);	
+			set_pkt_transport_tcp_flag(true);	
 			break;
 		case IPPROTO_UDP:
 			log_info("udp ");
-			set_pkt_udp_transport(true);
+			set_pkt_transport_udp_flag(true);
 			break;
 		case IPPROTO_ICMP:
 			log_info("icmp ");
