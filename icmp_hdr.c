@@ -24,4 +24,6 @@ void dump_icmp_hdr(const sniff_icmp_hdr_t* _icmp_hdr)
 	
 	uint16_t _cksum = ntohs(_icmp_hdr->icmp_cksum);
 	log_info("cksum: 0x%x ", _cksum);		
+	
+	log_info("\n");
 }
