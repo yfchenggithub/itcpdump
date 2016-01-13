@@ -19,17 +19,16 @@ void dump_ip_proto_str(u_char _ip_proto)
 {
 	switch (_ip_proto)
 	{
-		log_info("protocol: ");
 		case IPPROTO_TCP:
-			log_info("tcp ");
+			log_info("protocol: tcp ");
 			set_pkt_transport_tcp_flag(true);	
 			break;
 		case IPPROTO_UDP:
-			log_info("udp ");
+			log_info("protocol: udp ");
 			set_pkt_transport_udp_flag(true);
 			break;
 		case IPPROTO_ICMP:
-			log_info("icmp ");
+			log_info("protocol: icmp ");
 			set_pkt_icmp_flag(true);	
 			break;
 		default:

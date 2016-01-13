@@ -6,6 +6,7 @@
 #include "tcp_hdr.h"
 #include "udp_hdr.h"
 #include "arp_hdr.h"
+#include "icmp_hdr.h"
 #include "global.h"
 
 /*callback is passed to pcap_loop, called each time a packet received*/
@@ -27,6 +28,13 @@ void got_packet_callback(u_char* _pcap_loop_last_arg, const struct pcap_pkthdr* 
 		const sniff_ip_t* _ip_hdr = (const sniff_ip_t*)(packet + M_ETHER_HDR_LEN);
 		dump_ip_hdr(_ip_hdr);
 	}	
+
+	if (get_pkt_icmp_flag())
+	{
+		size_t _ip_hdr_size = sizeof(sniff_ip_t);
+		const sniff_icmp_hdr_t* _icmp_hdr = (const sniff_icmp_hdr_t*)(packet + M_ETHER_HDR_LEN + _ip_hdr_size);
+		dump_icmp_hdr(_icmp_hdr);			
+	}
 
 	if (get_pkt_transport_tcp_flag())
 	{

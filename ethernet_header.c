@@ -55,7 +55,9 @@ void dump_ether_header(const sniff_ethernet_t* _ether_hdr)
 		return;	
 	}	
 	
-	dump_ether_addr_str(_ether_hdr->ether_src_host);
+	log_info("dst mac: ");	
 	dump_ether_addr_str(_ether_hdr->ether_dst_host);	
+	log_info("src mac: ");	
+	dump_ether_addr_str(_ether_hdr->ether_src_host);
 	dump_ether_type_str(ntohs(_ether_hdr->ether_type));
 }
